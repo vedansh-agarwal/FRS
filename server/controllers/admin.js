@@ -5,8 +5,10 @@ const { spawnSync } = require("child_process");
 
 const db = require("../db/dbconnect");
 const filterFiller = require("../utils/filter");
-const uploadsFolder = path.join(__dirname, "..", "..", "user_images", "uploads");
-const tempFolder = path.join(__dirname, "..", "..", "user_images", "temp");
+const user_imagesFolder = path.join(__dirname, "..", "..", "user_images");
+const uploadsFolder = path.join(user_imagesFolder, "uploads");
+const tempFolder = path.join(user_imagesFolder, "temp");
+const deletesFolder = path.join(user_imagesFolder, "deletes");
 
 const fe_file = path.join(__dirname, "..", "face_encodings", "face_encodings.json");
 const pyscripts = path.join(__dirname, "..", "pyscripts");
@@ -126,7 +128,7 @@ const updateUser = async (req, res) => {
             if(err) {
                 errormsg = err.sqlMessage;
             }
-            else {
+            else if (base_img !== result[0].base_img){
                 fs.unlinkSync(path.join(uploadsFolder, result[0].base_img));
             }
         });
@@ -162,19 +164,46 @@ const updateUser = async (req, res) => {
     }
 }
 
-
+const deleteUser = async (req, res) => {
+    const user_id = req.query.user_id;
+    if (!user_id) { 
+        return res.status(200).json({ msg: "no user_id provided" });
+    }
+    db.promise().query("SELECT base_img FROM user WHERE user_id = ?", [user_id])
+    .then((result) => {
+        var errormsg = "";
+        db.execute("DELETE FROM user WHERE user_id = ?", [user_id], (err) => {
+            if(err) {
+                errormsg = err.sqlMessage;
+            }
+        });
+        if(errormsg !== "") {
+            return res.status(500).json({ msg: err.sqlMessage });
+        }
+        fs.renameSync(path.join(uploadsFolder, result[0][0].base_img), path.join(deletesFolder, result[0][0].base_img));
+        var fe_data = fs.readFileSync(fe_file);
+        fe_data = JSON.parse(fe_data);
+        delete fe_data[user_id];
+        fe_data = JSON.stringify(fe_data).replaceAll("],", "],\n").replaceAll("{", "{\n").replaceAll("}", "\n}");
+        fs.writeFileSync(fe_file, fe_data);
+        res.status(200).json({ msg: "User Deleted Successfully" });
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({ msg: err.sqlMessage });
+    });
+}
 
 
 module.exports = {
     adminLogin,
+    checkFace,
     createUser,
     updateUser,
+    deleteUser,
     // getUser,
     // getUsers,
     // getSortedUsers,
     // getFilteredUsers,
-    
-    // deleteUser,
-    checkFace,
 };
 

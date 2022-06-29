@@ -1,10 +1,12 @@
 user_images/captures/*
 user_images/temp/*
 user_images/uploads/*
+user_images/deletes/*
 
 !user_images/captures/.gitkeep
 !user_images/temp/.gitkeep
 !user_images/uploads/.gitkeep
+!user_images/deletes/.gitkeep
 
 server/node_modules
 
@@ -13,6 +15,7 @@ user_images/.DS_Store
 user_images/captures/.DS_Store
 user_images/temp/.DS_Store
 user_images/uploads/.DS_Store
+user_images/deletes/.DS_Store
 server/.DS_Store
 server/controllers/.DS_Store
 server/db/.DS_Store
