@@ -2,11 +2,15 @@ import face_recognition as fr
 import numpy as np
 import json
 import sys
+import os
 
-# str(sys.argv[1])
-# str(sys.argv[2])
-# "/Users/vedansh/Desktop/newer/FRS-refactored/user_images/temp/9cefc03e-b88f-4e35-9693-4b914518687c.jpeg"
-# "/Users/vedansh/Desktop/newer/FRS-refactored/server/face_encodings/face_encodings.json"
+config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+
+with open(config_file, 'r') as f:
+    configs = json.load(f)
+
+threshold = configs['threshold']
+training_model = configs["model_1"]
 
 imgloc = str(sys.argv[1])
 fe_file = str(sys.argv[2])
@@ -14,7 +18,7 @@ fe_file = str(sys.argv[2])
 output = {"msg": "", "user_id": "", "face_encoding": []}
 
 given_image = fr.load_image_file(imgloc)
-face_locations = fr.face_locations(given_image, model='hog')
+face_locations = fr.face_locations(given_image, model=training_model)
 
 if len(face_locations) == 0:
     output["msg"] = "no face found"
@@ -36,7 +40,7 @@ face_encoding = fr.face_encodings(given_image, face_locations)
 face_distances = fr.face_distance(known_face_encodings, face_encoding[0])
 best_match = np.argmin(face_distances)
 
-if(face_distances[best_match] < 0.6):
+if(face_distances[best_match] < threshold):
     output["msg"] = "existing user"
     output["user_id"] = known_faces[best_match]
 else:
