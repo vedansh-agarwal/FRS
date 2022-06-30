@@ -9,6 +9,7 @@ const user_imagesFolder = path.join(__dirname, "..", "..", "user_images");
 const uploadsFolder = path.join(user_imagesFolder, "uploads");
 const tempFolder = path.join(user_imagesFolder, "temp");
 const deletesFolder = path.join(user_imagesFolder, "deletes");
+const capturesFolder = path.join(user_imagesFolder, "captures");
 
 const fe_file = path.join(__dirname, "..", "face_encodings", "face_encodings.json");
 const pyscripts = path.join(__dirname, "..", "pyscripts");
@@ -45,7 +46,7 @@ const adminLogin = async (req, res) => {
       });
 };
 
-const checkFace = async (req, res) => {
+const recognizeFace = async (req, res) => {
     var { base64img, user_id } = req.body;
     if((!req.files || !req.files.base_img) && !base64img) {
         return res.status(206).json({ msg: "no image recieved" });
@@ -82,7 +83,7 @@ const checkFace = async (req, res) => {
         return res.status(211).json({msg: finalResult.msg, user_id: "", extension: ""});
     }
     else if(finalResult.msg === "existing user" && finalResult.user_id !== user_id) {
-        const existinguser = path.join(tempFolder, finalResult.user_id+extension);
+        const existinguser = path.join(capturesFolder, finalResult.user_id+extension);
         fs.renameSync(imgpath, existinguser);
         return res.status(211).json({msg: finalResult.msg, user_id: finalResult.user_id, extension: ""});
     }
@@ -197,7 +198,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
     adminLogin,
-    checkFace,
+    recognizeFace,
     createUser,
     updateUser,
     deleteUser,
