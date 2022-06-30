@@ -50,9 +50,9 @@ CREATE TABLE `tempdb`.`admin_log` (
   `change_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
   PRIMARY KEY (`change_id`));
 
-/* Trigger for admin_log on insert user */
+/* Trigger for creating log on insert user */
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `admin_log_on_insert` AFTER INSERT ON `user` FOR EACH ROW BEGIN
+CREATE DEFINER=`root`@`localhost` TRIGGER `create_log_on_insert` AFTER INSERT ON `user` FOR EACH ROW BEGIN
 	INSERT INTO `admin_log` (`change_by`, `change_on`, `change_type`)
     VALUE (NEW.`last_modified_by`, NEW.`user_id`, "INSERT");
     INSERT INTO `user_change_log` (`change_by`, `change_type`, `user_id`, `base_img`, `img_ext`, `name`, `mob_no`, `gender`, `city`, `department`, `date_created`) 
@@ -60,15 +60,26 @@ CREATE DEFINER=`root`@`localhost` TRIGGER `admin_log_on_insert` AFTER INSERT ON 
 END$$
 DELIMITER ;
 
-/* Trigger for admin_log on update user */
+/* Trigger for creating log on update user */
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `admin_log_on_update` AFTER UPDATE ON `user` FOR EACH ROW BEGIN
+CREATE DEFINER=`root`@`localhost` TRIGGER `create_log_on_update` AFTER UPDATE ON `user` FOR EACH ROW BEGIN
     IF (NEW.`base_img` != OLD.`base_img` OR NEW.`name` != OLD.`name` OR NEW.`mob_no` != OLD.`mob_no` OR NEW.`gender` != OLD.`gender` OR NEW.`city` != OLD.`city` OR NEW.`department` != OLD.`department`) THEN
         INSERT INTO `admin_log` (`change_by`, `change_on`, `change_type`)
 		VALUE (NEW.`last_modified_by`, NEW.`user_id`, "UPDATE");
         INSERT INTO `user_change_log` (`change_by`, `change_type`, `user_id`, `base_img`, `img_ext`, `name`, `mob_no`, `gender`, `city`, `department`, `date_created`) 
-		VALUE (NEW.`last_modified_by`, "INSERT", NEW.`user_id`, NEW.`base_img`, NEW.`img_ext`, NEW.`name`, NEW.`mob_no`, NEW.`gender`, NEW.`city`, NEW.`department`, NEW.`date_created`);
+		VALUE (NEW.`last_modified_by`, "UPDATE", NEW.`user_id`, NEW.`base_img`, NEW.`img_ext`, NEW.`name`, NEW.`mob_no`, NEW.`gender`, NEW.`city`, NEW.`department`, NEW.`date_created`);
     END IF;
+END$$
+DELIMITER ;
+
+/* Trigger for creating log on delete user */
+DELIMITER $$
+CREATE DEFINER = CURRENT_USER TRIGGER `tempdb`.`create_log_on_delete` AFTER DELETE ON `user` FOR EACH ROW
+BEGIN
+	INSERT INTO `admin_log` (`change_by`, `change_on`, `change_type`)
+	VALUE (OLD.`last_modified_by`, OLD.`user_id`, "DELETE");
+	INSERT INTO `user_change_log` (`change_by`, `change_type`, `user_id`, `base_img`, `img_ext`, `name`, `mob_no`, `gender`, `city`, `department`, `date_created`) 
+	VALUE (OLD.`last_modified_by`, "DELETE", OLD.`user_id`, OLD.`base_img`, OLD.`img_ext`, OLD.`name`, OLD.`mob_no`, OLD.`gender`, OLD.`city`, OLD.`department`, OLD.`date_created`);
 END$$
 DELIMITER ;
 
