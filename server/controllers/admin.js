@@ -90,7 +90,7 @@ const recognizeFace = async (req, res) => {
     else {
         return res.status(211).json({msg: finalResult.msg, user_id: user_id, extension: extension, face_encoding: finalResult.face_encoding});
     }
-  };
+};
 
 const createUser = async (req, res) => {
     const {user_id, name, mob_no, gender, city, department, last_modified_by, extension, face_encoding} =  req.body;
@@ -187,6 +187,95 @@ const deleteUser = async (req, res) => {
     });
 }
 
+const getUser = async (req, res) => {
+    const user_id = req.query.user_id;
+    if (!user_id) { 
+        return res.status(200).json({ msg: "no user_id provided" });
+    }
+
+    db.promise().query("SELECT * FROM get_user WHERE user_id = ?", [user_id])
+    .then((result) => {
+        if(!result[0][0]) {
+            res.status(400).json({msg:"user does not exist"});
+        }
+        else {
+            result[0][0].date_created = String(result[0][0].date_created).substring(4,15);
+            res.status(200).json(result[0][0]);
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({ msg: err.sqlMessage });
+    });
+}
+
+const getUsers = async (req, res) => {
+    db.promise().query("SELECT * FROM get_user ORDER BY date_created DESC LIMIT 20")
+    .then((result) => {
+        if(!result[0][0]) {
+            res.status(400).json({msg:"no users in the db"});
+        }
+        else {
+            result[0].forEach((user) => {
+                user.date_created = String(user.date_created).substring(4,15);
+            });
+            res.status(200).json(result[0]);
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({ msg: err.sqlMessage });
+    });
+}
+
+const getSortedUsers = async (req, res) => {
+    var {col_name, sort_order} = req.body;
+    if(!col_name)
+        return res.status(206).json({msg:"no col_name provided"});
+    if(sort_order === "ascending")
+        sort_order = "";
+    else if(sort_order === "descending")
+        sort_order = "DESC";
+    else
+        return res.status(415).json({msg:"invalid sort order request"});
+    
+    db.promise().query(`SELECT * FROM get_user ORDER BY ?? ${sort_order}`, [col_name])
+    .then((result) => {
+        if(!result[0][0]) {
+            res.status(400).json({msg:"no users in the db"});
+        }
+        else {
+            result[0].forEach((user) => {
+                user.date_created = String(user.date_created).substring(4,15);
+            });
+            res.status(200).json(result[0]);
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(500).json({ msg: err.sqlMessage });
+    });
+}
+
+const getFilteredUsers = async (req, res) => {
+    var { name, gender, city, department, date_created } = filterFiller(req.body);
+    db.promise().query(`SELECT * FROM user WHERE name IN (${name}) AND gender IN (${gender}) AND city IN (${city}) AND department IN (${department}) AND date_created ${date_created}`)
+    .then((result) => {
+      if (!result[0][0]) {
+        res.status(210).json({ msg: "no users match the criteria" });
+      }
+      else {
+        result[0].forEach((user) => {
+          user.date_created = String(user.date_created).substring(4, 15);
+        });
+        res.status(200).json(result[0]);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ msg: err.sqlMessage });
+    });
+}
 
 module.exports = {
     adminLogin,
@@ -194,9 +283,9 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    // getUser,
-    // getUsers,
-    // getSortedUsers,
-    // getFilteredUsers,
+    getUser,
+    getUsers,
+    getSortedUsers,
+    getFilteredUsers
 };
 

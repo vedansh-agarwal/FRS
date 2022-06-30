@@ -1,11 +1,5 @@
 const filterFiller = (dict) => {
-    var { 
-        name, 
-        gender, 
-        city, 
-        department, 
-        date_created 
-    } = dict;
+    var { name, gender, city, department, date_created } = dict;
   
     if (!name || !name[0]) {
         name = "SELECT name FROM user";
@@ -51,13 +45,7 @@ const filterFiller = (dict) => {
         date_created = `BETWEEN '${date_created[0]}' AND '${date_created[1]}'`;
     }
   
-    return { 
-        name, 
-        gender, 
-        city, 
-        department, 
-        date_created 
-    };
+    return { name, gender, city, department, date_created };
   };
   
   module.exports = filterFiller;
