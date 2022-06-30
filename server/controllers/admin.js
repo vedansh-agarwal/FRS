@@ -170,18 +170,10 @@ const deleteUser = async (req, res) => {
     if (!user_id) { 
         return res.status(200).json({ msg: "no user_id provided" });
     }
-    db.promise().query("SELECT base_img FROM user WHERE user_id = ?", [user_id])
+
+    db.promise().query("CALL delete_user(?)", [user_id])
     .then((result) => {
-        var errormsg = "";
-        db.execute("DELETE FROM user WHERE user_id = ?", [user_id], (err) => {
-            if(err) {
-                errormsg = err.sqlMessage;
-            }
-        });
-        if(errormsg !== "") {
-            return res.status(500).json({ msg: err.sqlMessage });
-        }
-        fs.renameSync(path.join(uploadsFolder, result[0][0].base_img), path.join(deletesFolder, result[0][0].base_img));
+        fs.renameSync(path.join(uploadsFolder, result[0][0][0].base_img), path.join(deletesFolder, result[0][0][0].base_img));
         var fe_data = fs.readFileSync(fe_file);
         fe_data = JSON.parse(fe_data);
         delete fe_data[user_id];

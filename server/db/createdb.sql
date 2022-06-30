@@ -72,7 +72,7 @@ CREATE DEFINER=`root`@`localhost` TRIGGER `create_log_on_update` AFTER UPDATE ON
 END$$
 DELIMITER ;
 
-/* Trigger for creating log on delete user */
+/*.Trigger for creating log on delete user */
 DELIMITER $$
 CREATE DEFINER = CURRENT_USER TRIGGER `tempdb`.`create_log_on_delete` AFTER DELETE ON `user` FOR EACH ROW
 BEGIN
@@ -100,10 +100,19 @@ VIEW `tempdb`.`get_user` AS
         `tempdb`.`user`.`date_created` AS `date_created`
     FROM
         `tempdb`.`user`;
-        
+
+/* Delete user procedure */
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_user`(IN usr_id VARCHAR(36))
+BEGIN
+	SELECT `base_img` FROM `user` WHERE `user_id` = usr_id;
+    DELETE FROM `user` WHERE `user_id` = usr_id;
+END$$
+DELIMITER ;
+
 /* Increment capture_count procedure */
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `increment_capture_counter`(IN usr_id VARCHAR(36))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `capture_counter_increment`(IN usr_id VARCHAR(36))
 BEGIN
 UPDATE `user` SET `captured_count` = `captured_count`+1 WHERE `user_id` = usr_id;
 SELECT `captured_count` FROM `user` WHERE `user_id` = usr_id;
