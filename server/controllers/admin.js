@@ -32,7 +32,7 @@ const adminLogin = async (req, res) => {
             res.status(404).json({ msg: "user does not exist" });
         }
         else {
-          if (password === result[0].password) {
+          if (password === result[0][0].password) {
             res.status(200).json({ msg: "login successful" });
           }
           else {
