@@ -19,7 +19,9 @@ app.use(
 );
 
 const admin = require("./routes/admin");
+const user = require("./routes/user")
 
 app.use("/admin", admin);
+app.use("/user", user);
 
 app.listen(port, console.log(`Server listening at http://localhost:${port}`));

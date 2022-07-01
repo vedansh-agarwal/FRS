@@ -1,13 +1,22 @@
-/* Creating Database */
+/* Creating database */
 DROP SCHEMA IF EXISTS `tempdb`;
 CREATE SCHEMA `tempdb`;
 USE `tempdb`;
 
-/* Creating Admin table */
+/* Creating admin table */
 CREATE TABLE `tempdb`.`admin` (
   `username` VARCHAR(20) NOT NULL,
   `password` VARCHAR(20) NOT NULL,
   PRIMARY KEY (`username`));
+  
+/* Creating admin logs table */
+CREATE TABLE `tempdb`.`admin_log` (
+  `change_id` INT NOT NULL AUTO_INCREMENT,
+  `change_by` VARCHAR(20) NOT NULL,
+  `change_on` VARCHAR(36) NOT NULL,
+  `change_type` VARCHAR(6) NOT NULL,
+  `change_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`change_id`));
 
 /* Creating user table */
 CREATE TABLE `tempdb`.`user` (
@@ -24,7 +33,7 @@ CREATE TABLE `tempdb`.`user` (
   `last_modified_by` VARCHAR(20) NOT NULL,
   PRIMARY KEY (`user_id`));
   
-/*.Creating user table */
+/* Creating user change log table */
 CREATE TABLE `tempdb`.`user_change_log` (
   `change_id` INT NOT NULL AUTO_INCREMENT,
   `change_by` VARCHAR(45) NOT NULL,
@@ -41,14 +50,15 @@ CREATE TABLE `tempdb`.`user_change_log` (
   `date_created` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`change_id`));
 
-/* Creating admin logs table */
-CREATE TABLE `tempdb`.`admin_log` (
-  `change_id` INT NOT NULL AUTO_INCREMENT,
-  `change_by` VARCHAR(20) NOT NULL,
-  `change_on` VARCHAR(36) NOT NULL,
-  `change_type` VARCHAR(6) NOT NULL,
-  `change_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-  PRIMARY KEY (`change_id`));
+/* Creating user capture log table */
+CREATE TABLE `tempdb`.`user_capture_log` (
+  `capture_id` INT NOT NULL AUTO_INCREMENT,
+  `img_name` VARCHAR(50) NOT NULL,
+  `recognition_status` VARCHAR(5) NOT NULL,
+  `user_id` VARCHAR(36) NULL,
+  `in/out` VARCHAR(3) NOT NULL,
+  `date_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`capture_id`));
 
 /* Trigger for creating log on insert user */
 DELIMITER $$
@@ -72,7 +82,7 @@ CREATE DEFINER=`root`@`localhost` TRIGGER `create_log_on_update` AFTER UPDATE ON
 END$$
 DELIMITER ;
 
-/*.Trigger for creating log on delete user */
+/* Trigger for creating log on delete user */
 DELIMITER $$
 CREATE DEFINER = CURRENT_USER TRIGGER `tempdb`.`create_log_on_delete` AFTER DELETE ON `user` FOR EACH ROW
 BEGIN
@@ -112,9 +122,20 @@ DELIMITER ;
 
 /* Increment capture_count procedure */
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `capture_counter_increment`(IN usr_id VARCHAR(36))
+CREATE PROCEDURE `record_user_capture` (IN img VARCHAR(50), IN usr_id VARCHAR(36), IN in_sts VARCHAR(3))
 BEGIN
-UPDATE `user` SET `captured_count` = `captured_count`+1 WHERE `user_id` = usr_id;
-SELECT `captured_count` FROM `user` WHERE `user_id` = usr_id;
+	IF (usr_id != "unrecognized") THEN
+		UPDATE `user` SET `captured_count` = `captured_count`+1 WHERE `user_id` = usr_id;
+        SET @cap_cnt = (SELECT `captured_count` FROM `user` WHERE `user_id` = usr_id);
+        SET @user_name = (SELECT `name` FROM `user` WHERE `user_id` = usr_id);
+        SET @img_name = CONCAT(@cap_cnt, "==", img);
+        INSERT INTO `user_capture_log` (`img_name`, `recognition_status`, `user_id`, `in/out`) 
+        VALUES (@img_name, "TRUE", usr_id, in_sts);
+        SELECT @img_name, @user_name;
+    END IF;
+    IF (usr_id = "unrecognized") THEN
+		INSERT INTO `user_capture_log` (`img_name`, `recognition_status`, `in/out`) 
+        VALUES (img, "FALSE", in_sts);
+    END IF;
 END$$
 DELIMITER ;

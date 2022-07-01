@@ -83,8 +83,7 @@ const recognizeFace = async (req, res) => {
         return res.status(211).json({msg: finalResult.msg, user_id: "", extension: ""});
     }
     else if(finalResult.msg === "existing user" && finalResult.user_id !== user_id) {
-        const existinguser = path.join(capturesFolder, finalResult.user_id+extension);
-        fs.renameSync(imgpath, existinguser);
+        fs.unlinkSync(imgpath);
         return res.status(211).json({msg: finalResult.msg, user_id: finalResult.user_id, extension: ""});
     }
     else {
