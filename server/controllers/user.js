@@ -46,10 +46,10 @@ const recognizeUser = async (req, res) => {
             fs.renameSync(imgpath, path.join(capturesFolder, result[0][0][0]["@img_name"]))
             var user_name = result[0][0][0]["@user_name"];
             if(in_out_status == "IN") {
-                return res.status(211).json({msg: `Hello ${user_name}!`});
+                return res.status(211).json({msg: `Hello ${user_name}!`, user_id: finalResult.user_id});
             }
             else {
-                return res.status(211).json({msg: `Bye ${user_name}`});
+                return res.status(211).json({msg: `Bye ${user_name}`, user_id: finalResult.user_id});
             }
         })
         .catch((err) => {
