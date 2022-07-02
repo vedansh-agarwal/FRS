@@ -113,8 +113,9 @@ VIEW `tempdb`.`get_user` AS
 
 /* Delete user procedure */
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_user`(IN usr_id VARCHAR(36))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_user`(IN usr_id VARCHAR(36), IN last_modifier VARCHAR(20))
 BEGIN
+	UPDATE `user` SET `last_modified_by` = last_modifier WHERE `user_id` = usr_id;
 	SELECT `base_img` FROM `user` WHERE `user_id` = usr_id;
     DELETE FROM `user` WHERE `user_id` = usr_id;
 END$$

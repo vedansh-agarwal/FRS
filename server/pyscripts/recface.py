@@ -15,16 +15,18 @@ training_model = configs["model_1"]
 imgloc = str(sys.argv[1])
 fe_file = str(sys.argv[2])
 
-output = {"msg": "", "user_id": "", "face_encoding": []}
+output = {'msg': ''}
 
 given_image = fr.load_image_file(imgloc)
 face_locations = fr.face_locations(given_image, model=training_model)
 
 if len(face_locations) == 0:
-    output["msg"] = "no face found"
+    output['msg'] = 'no face found'
+    print(output)
     sys.exit()
 elif len(face_locations) > 1:
-    output["msg"] = "multiple faces found"
+    output['msg'] = 'multiple faces found'
+    print(output)
     sys.exit()
 
 with open(fe_file, 'r') as f:
@@ -41,10 +43,10 @@ face_distances = fr.face_distance(known_face_encodings, face_encoding[0])
 best_match = np.argmin(face_distances)
 
 if(face_distances[best_match] < threshold):
-    output["msg"] = "existing user"
-    output["user_id"] = known_faces[best_match]
+    output['msg'] = 'existing user'
+    output['user_id'] = known_faces[best_match]
 else:
-    output["msg"] = "new user"
-    output["face_encoding"] = face_encoding[0].tolist()
+    output['msg'] = 'new user'
+    output['face_encoding'] = face_encoding[0].tolist()
 
 print(output)

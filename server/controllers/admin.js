@@ -5,6 +5,9 @@ const { spawnSync } = require("child_process");
 
 const db = require("../db/dbconnect");
 const filterFiller = require("../utils/filter");
+const alog = require("../utils/adminLogger");
+const ulog = require("../utils/userLogger");
+
 const user_imagesFolder = path.join(__dirname, "..", "..", "user_images");
 const uploadsFolder = path.join(user_imagesFolder, "uploads");
 const tempFolder = path.join(user_imagesFolder, "temp");
@@ -25,29 +28,36 @@ const adminLogin = async (req, res) => {
         return res.status(206).json({ msg: "no password provided" });
     }
   
-    db.promise()
-      .query("SELECT password FROM admin WHERE username = ?", [username])
-      .then((result) => {
-        if (!result[0]) {
+    db.promise().query("SELECT password FROM admin WHERE username = ?", [username])
+    .then((result) => {
+        if (!result[0][0]) {
+            alog("", `Admin Login attempted with incorrect username: ${username}`);
             res.status(404).json({ msg: "user does not exist" });
         }
         else {
           if (password === result[0][0].password) {
+            alog(username, "Admin Login successful");
             res.status(200).json({ msg: "login successful" });
           }
           else {
+            alog(username, `Admin Login attempted with incorrect password: ${password}`);
             res.status(422).json({ msg: "login unsuccessful" });
           }
         }
-      })
-      .catch((err) => {
+    })
+    .catch((err) => {
         console.log(err);
         res.status(500).json({ msg: err.sqlMessage });
-      });
+    });
 };
 
 const recognizeFace = async (req, res) => {
-    var { base64img, user_id } = req.body;
+    var { base64img, user_id, admin } = req.body;
+
+    if(!admin) {
+        return res.status(206).json({ msg: "insufficient data provided" });
+    }
+
     if((!req.files || !req.files.base_img) && !base64img) {
         return res.status(206).json({ msg: "no image recieved" });
     }
@@ -59,6 +69,7 @@ const recognizeFace = async (req, res) => {
         extension += base64img.substring(11, base64img.indexOf(";"));
     }
     if(extension !== ".png" && extension !== ".jpeg") {
+        alog(username, `Unsupported filetype: ${extension} input by the admin`);
         return res.status(415).json({ msg: "unsupported filetype" });
     }
 
@@ -80,13 +91,16 @@ const recognizeFace = async (req, res) => {
     const finalResult = JSON.parse(String(process.stdout).replace(/'/g, '"'));
 
     if(finalResult.msg === "no face found" || finalResult.msg === "multiple faces found") {
+        alog(admin, `Image with ${finalResult.msg.substring(0, finalResult.msg.lastIndexOf(" "))} input by the admin`);
         return res.status(211).json({msg: finalResult.msg, user_id: "", extension: ""});
     }
     else if(finalResult.msg === "existing user" && finalResult.user_id !== user_id) {
         fs.unlinkSync(imgpath);
+        alog(admin, `Image with existing user_id: ${finalResult.user_id} input by the admin`);
         return res.status(211).json({msg: finalResult.msg, user_id: finalResult.user_id, extension: ""});
     }
     else {
+        alog(admin, `Image with new user_id: ${user_id} input by the admin`);
         return res.status(211).json({msg: finalResult.msg, user_id: user_id, extension: extension, face_encoding: finalResult.face_encoding});
     }
 };
@@ -107,6 +121,8 @@ const createUser = async (req, res) => {
         fe_data[user_id] = face_encoding;
         fe_data = JSON.stringify(fe_data).replaceAll("],", "],\n").replaceAll("{", "{\n").replaceAll("}", "\n}");
         fs.writeFileSync(fe_file, fe_data);
+        alog(last_modified_by, `Admin created user with user_id: ${user_id}`);
+        ulog(user_id, `User created`);
         res.status(201).json({msg: `User Created Successfully with user id: ${user_id}`});
     })
     .catch((err) => {
@@ -121,6 +137,9 @@ const updateUser = async (req, res) => {
         return res.status(200).json({ msg: "no user_id provided" });
     }
     const { name, mob_no, gender, city, department, extension, last_modified_by, face_encoding } = req.body;
+    if(!name || !mob_no || !gender || !city || !department || !last_modified_by) {
+        return res.status(206).json({ msg: "insufficient data provided" });
+    }
     if(extension) {
         const base_img = user_id+extension;
         var errormsg = "";
@@ -144,6 +163,8 @@ const updateUser = async (req, res) => {
             fe_data[user_id] = face_encoding;
             fe_data = JSON.stringify(fe_data).replaceAll("],", "],\n").replaceAll("{", "{\n").replaceAll("}", "\n}");
             fs.writeFileSync(fe_file, fe_data);
+            alog(last_modified_by, `Admin updated user with user_id: ${user_id}`);
+            ulog(user_id, `User details updated`);
             res.status(201).json({msg: `User Updated Successfully`});
         })
         .catch((err) => {
@@ -155,6 +176,8 @@ const updateUser = async (req, res) => {
         db.promise().query("UPDATE user SET name = ?, mob_no = ?, gender = ?, city = ?, department = ?, last_modified_by = ? WHERE user_id = ?",
         [name, mob_no, gender, city, department, last_modified_by, user_id])
         .then(() => {
+            alog(last_modified_by, `Admin updated user with user_id: ${user_id}`);
+            ulog(user_id, `User details updated`);
             res.status(201).json({msg: `User Updated Successfully`});
         })
         .catch((err) => {
@@ -170,7 +193,12 @@ const deleteUser = async (req, res) => {
         return res.status(200).json({ msg: "no user_id provided" });
     }
 
-    db.promise().query("CALL delete_user(?)", [user_id])
+    const { last_modified_by } = req.body;
+    if(!last_modified_by) {
+        return res.status(206).json({ msg: "insufficient data provided" });
+    }
+
+    db.promise().query("CALL delete_user(?, ?)", [user_id, last_modified_by])
     .then((result) => {
         fs.renameSync(path.join(uploadsFolder, result[0][0][0].base_img), path.join(deletesFolder, result[0][0][0].base_img));
         var fe_data = fs.readFileSync(fe_file);
@@ -178,6 +206,8 @@ const deleteUser = async (req, res) => {
         delete fe_data[user_id];
         fe_data = JSON.stringify(fe_data).replaceAll("],", "],\n").replaceAll("{", "{\n").replaceAll("}", "\n}");
         fs.writeFileSync(fe_file, fe_data);
+        alog(last_modified_by, `Admin deleted user with user_id: ${user_id}`);
+        ulog(user_id, `User deleted`);
         res.status(200).json({ msg: "User Deleted Successfully" });
     })
     .catch((err) => {

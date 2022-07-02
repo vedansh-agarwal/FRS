@@ -10,6 +10,8 @@ const tempFolder = path.join(user_imagesFolder, "temp");
 const deletesFolder = path.join(user_imagesFolder, "deletes");
 const capturesFolder = path.join(user_imagesFolder, "captures");
 
+const clog = require("../utils/captureLogger");
+
 const fe_file = path.join(__dirname, "..", "face_encodings", "face_encodings.json");
 const pyscripts = path.join(__dirname, "..", "pyscripts");
 const recface = path.join(pyscripts, "recface.py");
@@ -45,6 +47,7 @@ const recognizeUser = async (req, res) => {
         .then((result) => {
             fs.renameSync(imgpath, path.join(capturesFolder, result[0][0][0]["@img_name"]))
             var user_name = result[0][0][0]["@user_name"];
+            clog(finalResult.user_id, "recognized", result[0][0][0]["@user_name"]);
             if(in_out_status == "IN") {
                 return res.status(211).json({msg: `Hello ${user_name}!`, user_id: finalResult.user_id});
             }
@@ -63,6 +66,7 @@ const recognizeUser = async (req, res) => {
             console.log(err);
             res.status(500).json({ msg: err.sqlMessage });
         });
+        clog(img, "unrecognized");
         return res.status(211).json({msg: "User Not Recognized"});
     }
 }
