@@ -1,1 +1,5 @@
 This file keeps track of successful and unsuccessful admin login attempts and operations performed by the admin.
+
+2/7/2022, 10:16:06 pm	Username: sumedh              	Image with new user_id: 483da16b-f371-4fd4-9ae9-8c1bfaf0ffda input by the admin.
+2/7/2022, 10:29:25 pm	Username: sumedh              	Image with new user_id: ab50a844-8c42-422b-96b8-5b50ff418c8a input by the admin.
+2/7/2022, 10:29:45 pm	Username: sumedh              	Admin created user with user_id: ab50a844-8c42-422b-96b8-5b50ff418c8a.
