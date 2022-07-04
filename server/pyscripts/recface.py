@@ -12,6 +12,7 @@ with open(config_file, 'r') as f:
 
 threshold = configs['threshold']
 training_model = configs["model_1"]
+area_ratio = configs["area_ratio"]
 
 imgloc = str(sys.argv[1])
 fe_file = str(sys.argv[2])
@@ -35,7 +36,7 @@ elif len(face_locations) > 1:
 t, r, b, l = face_locations[0]
 h, w, c = im.shape
 
-if (r - l) * (b - t) / (h * w) < 0.6:
+if (r - l) * (b - t) / (h * w) < area_ratio:
     output['msg'] = 'reduce distance between face and camera'
     print(output)
     sys.exit()
