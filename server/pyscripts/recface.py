@@ -12,7 +12,7 @@ with open(config_file, 'r') as f:
 
 threshold = configs['threshold']
 training_model = configs["model_1"]
-area_ratio = configs["area_ratio"]
+face_ratio = configs["face_ratio"]
 
 imgloc = str(sys.argv[1])
 fe_file = str(sys.argv[2])
@@ -37,7 +37,13 @@ elif len(face_locations) > 1:
 t, r, b, l = face_locations[0]
 h, w, c = im.shape
 
-if (use_case != "user") and ((r - l) * (b - t) / (h * w) < area_ratio):
+with open("test.txt", "a+") as file:
+    file.write(f"{t},{r},{b},{l},{h},{w}\n")
+    file.write("b-t/h = " + str((b-t)/h) + "\n")
+    file.write("r-l/w = " + str((r-l)/w) + "\n")
+    file.write("(r - l) * (b - t) / (h * w) = " + str((r - l) * (b - t) / (h * w)) + "\n\n")
+
+if (use_case != "user") and ((b-t) / h < face_ratio) and ((r-l)/w < face_ratio) and ((r - l) * (b - t) / (h * w) < face_ratio):
     output['msg'] = 'reduce distance between face and camera'
     print(output)
     sys.exit()
