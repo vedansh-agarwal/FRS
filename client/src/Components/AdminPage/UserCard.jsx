@@ -8,6 +8,7 @@ import {
   getDisplayUser,
 } from "../../Redux/functions/userFunctions";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import DeleteConfirm from "./UserActions/DeleteConfirm";
 import ModifyModal from "./UserActions/ModifyModal";
 import UploadPic from "./UserActions/UploadPic";
@@ -75,6 +76,11 @@ const UserCard = ({ user, setClick }) => {
         md={4}
         lg={2.5}
         key={user}
+        component={motion.div}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        whileTap={{ scale: 0.9 }}
         sx={{ mx: "auto", display: "flex" }}
         justifyContent='center'
       >
@@ -89,6 +95,9 @@ const UserCard = ({ user, setClick }) => {
           <Button
             variant='contained'
             className='imageModify'
+            component={motion.div}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleModify(user.user_id)}
           >
             Modify
@@ -96,7 +105,9 @@ const UserCard = ({ user, setClick }) => {
           <IconButton
             className='imageDelete'
             variant='contained'
-            component='span'
+            component={motion.span}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleDelete()}
           >
             <Box className='buttonBox'>

@@ -8,7 +8,11 @@ import {
   FormHelperText,
   InputLabel,
   Button,
+  IconButton,
+  Box,
 } from "@mui/material";
+import { MdKeyboardArrowUp } from "react-icons/md";
+import { motion } from "framer-motion";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
@@ -23,6 +27,7 @@ const Search = () => {
   const [department, setDepartment] = useState([]);
   const [gender, setGender] = useState([""]);
   const [date, setDate] = useState([null, "after"]);
+  const [click, setClick] = useState(false);
 
   const handleSubmit = () => {
     console.log(city.length);
@@ -49,90 +54,125 @@ const Search = () => {
   };
 
   return (
-    <Grid container columnGap={3}>
-      <Grid item xs>
-        <TextField
-          label='Name'
-          variant='outlined'
-          value={name && name.join(" ")}
-          onChange={(e) => {
-            setName(e.target.value.split(" "));
-          }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs>
-        <FormControl fullWidth>
-          <InputLabel id='genderId'>Gender</InputLabel>
-          <Select
-            label='Gender'
-            labelId='genderId'
-            value={gender[0]}
-            onChange={(e) => setGender([e.target.value])}
-          >
-            <MenuItem value='M'>Male</MenuItem>
-            <MenuItem value='F'>Female</MenuItem>
-            <MenuItem value='O'>Prefer not to say</MenuItem>
-            <MenuItem value=''>Clear</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs>
-        <TextField
-          label='City'
-          variant='outlined'
-          value={city && city.join(" ")}
-          onChange={(e) => {
-            setCity(e.target.value.split(" "));
-          }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs>
-        <TextField
-          label='Department'
-          variant='outlined'
-          value={department && department.join(" ")}
-          onChange={(e) => {
-            setDepartment(e.target.value.split(" "));
-          }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs>
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-          <DesktopDatePicker
-            label='Date desktop'
-            inputFormat='DD/MM/YYYY'
-            value={date[0]}
+    <>
+      <Grid
+        container
+        columnGap={3}
+        rowGap={3}
+        sx={{
+          flexDirection: ["column", "column", "row"],
+          display: [click ? "none" : "flex", click ? "none" : "flex", "flex"],
+        }}
+      >
+        <Grid item xs>
+          <TextField
+            label='Name'
+            variant='outlined'
+            value={name && name.join(" ")}
             onChange={(e) => {
-              setDate((prev) => [e, prev[1]]);
-              console.log(date[0].format("DD-MM-YYYY"));
+              setName(e.target.value.split(" "));
             }}
-            renderInput={(params) => <TextField {...params} />}
+            fullWidth
           />
-        </LocalizationProvider>
-      </Grid>
-      <Grid item xs>
-        <FormControl fullWidth>
-          <InputLabel id='zoneId'>Zone</InputLabel>
-          <Select
-            label='Gender'
-            labelId='zoneId'
-            value={date[1]}
-            onChange={(e) => setDate((prev) => [prev[0], e.target.value])}
-          >
-            <MenuItem value='before'>Before</MenuItem>
-            <MenuItem value='after'>After</MenuItem>
-            <MenuItem value='at'>At</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
+        </Grid>
+        <Grid item xs>
+          <FormControl fullWidth>
+            <InputLabel id='genderId'>Gender</InputLabel>
+            <Select
+              label='Gender'
+              labelId='genderId'
+              value={gender[0]}
+              onChange={(e) => setGender([e.target.value])}
+            >
+              <MenuItem value='M'>Male</MenuItem>
+              <MenuItem value='F'>Female</MenuItem>
+              <MenuItem value='O'>Prefer not to say</MenuItem>
+              <MenuItem value=''>Clear</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs>
+          <TextField
+            label='City'
+            variant='outlined'
+            value={city && city.join(" ")}
+            onChange={(e) => {
+              setCity(e.target.value.split(" "));
+            }}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs>
+          <TextField
+            label='Department'
+            variant='outlined'
+            value={department && department.join(" ")}
+            onChange={(e) => {
+              setDepartment(e.target.value.split(" "));
+            }}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs>
+          <LocalizationProvider dateAdapter={AdapterMoment}>
+            <DesktopDatePicker
+              label='Date desktop'
+              inputFormat='DD/MM/YYYY'
+              value={date[0]}
+              fullWidth
+              onChange={(e) => {
+                setDate((prev) => [e, prev[1]]);
+                console.log(date[0].format("DD-MM-YYYY"));
+              }}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+        </Grid>
+        <Grid item xs>
+          <FormControl fullWidth>
+            <InputLabel id='zoneId'>Zone</InputLabel>
+            <Select
+              label='Gender'
+              labelId='zoneId'
+              value={date[1]}
+              onChange={(e) => setDate((prev) => [prev[0], e.target.value])}
+            >
+              <MenuItem value='before'>Before</MenuItem>
+              <MenuItem value='after'>After</MenuItem>
+              <MenuItem value='at'>At</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-      <Button onClick={handleSubmit} variant='contained'>
-        Search
-      </Button>
-    </Grid>
+        <Button onClick={handleSubmit} variant='contained'>
+          Search
+        </Button>
+      </Grid>
+      {click ? (
+        <Button
+          sx={{
+            display: [click ? "flex" : "none", click ? "flex" : "none", "none"],
+          }}
+          onClick={() => setClick(false)}
+          variant='contained'
+        >
+          Search
+        </Button>
+      ) : (
+        <IconButton
+          className=''
+          variant='outlined'
+          sx={{
+            display: [click ? "flex" : "none", click ? "flex" : "none", "none"],
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onClick={() => setClick(true)}
+        >
+          <MdKeyboardArrowUp size={30} />
+        </IconButton>
+      )}
+    </>
   );
 };
 

@@ -80,8 +80,13 @@ const AdminPage = () => {
           {loading.addUser && loading.deleteUser && loading.getUsers ? (
             <CircularProgress />
           ) : (
-            <Grid container columnGap={2} justifyContent='center'>
-              <Grid item xs={click ? 9 : 12}>
+            <Grid
+              container
+              columnGap={2}
+              justifyContent='space-between'
+              flexDirection={["column-reverse", "column-reverse", "row"]}
+            >
+              <Grid item xs={click ? [12, 12, 9] : 12}>
                 <Grid container gap={3} justifyContent='center'>
                   {!error.getUsers &&
                     !error.filterUsers &&
@@ -97,7 +102,7 @@ const AdminPage = () => {
               </Grid>
               <Grid
                 item
-                xs={2.5}
+                xs={[3, 2.5]}
                 display={click ? "flex" : "none"}
                 justifyContent='center'
               >
