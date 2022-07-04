@@ -23,3 +23,10 @@ server/face_encodings/.DS_Store
 server/pyscripts/.DS_Store
 server/routes/.DS_Store
 server/utils/.DS_Store
+
+# To keep the files below clean
+server/face_encodings/face_encodings.json
+log_files/admin_activity.txt
+log_files/user_capture.txt
+log_files/user_changes.txt
+server/db/dbconnect.js
