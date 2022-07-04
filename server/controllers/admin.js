@@ -106,6 +106,7 @@ const recognizeFace = async (req, res) => {
         finalResult.msg.lastIndexOf(" ")
       )} input by the admin`
     );
+    fs.unlinkSync(imgpath);
     return res
       .status(216)
       .json({ msg: finalResult.msg, user_id: "", extension: "" });
