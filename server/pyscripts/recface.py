@@ -16,6 +16,7 @@ area_ratio = configs["area_ratio"]
 
 imgloc = str(sys.argv[1])
 fe_file = str(sys.argv[2])
+use_case = str(sys.argv[3])
 
 output = {'msg': ''}
 
@@ -36,7 +37,7 @@ elif len(face_locations) > 1:
 t, r, b, l = face_locations[0]
 h, w, c = im.shape
 
-if (r - l) * (b - t) / (h * w) < area_ratio:
+if (use_case != "user") and ((r - l) * (b - t) / (h * w) < area_ratio):
     output['msg'] = 'reduce distance between face and camera'
     print(output)
     sys.exit()
