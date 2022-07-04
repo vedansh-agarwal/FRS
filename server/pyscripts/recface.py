@@ -32,9 +32,6 @@ elif len(face_locations) > 1:
 with open(fe_file, 'r') as f:
     face_emb = json.load(f)
 
-for k in face_emb.keys():
-    face_emb[k] = np.asarray(face_emb[k])
-
 known_faces = list(face_emb.keys())
 known_face_encodings = list(face_emb.values())
 
@@ -45,6 +42,7 @@ best_match = np.argmin(face_distances)
 if(face_distances[best_match] < threshold):
     output['msg'] = 'existing user'
     output['user_id'] = known_faces[best_match]
+    output['face_encoding'] = known_face_encodings[best_match]
 else:
     output['msg'] = 'new user'
     output['face_encoding'] = face_encoding[0].tolist()

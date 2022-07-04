@@ -140,3 +140,7 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+/* Inserting dummy admin values */
+INSERT INTO `tempdb`.`admin` (`username`, `password`) VALUES ('vedansh', 'password');
+INSERT INTO `tempdb`.`admin` (`username`, `password`) VALUES ('sumedh', 'sudu_1000');
