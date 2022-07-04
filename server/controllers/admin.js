@@ -110,6 +110,10 @@ const recognizeFace = async (req, res) => {
     return res
       .status(216)
       .json({ msg: finalResult.msg, user_id: "", extension: "" });
+  } else if(finalResult.msg === "reduce distance between face and camera") {
+    return res
+      .status(216)
+      .json({ msg: finalResult.msg, user_id: "", extension: "" });
   } else if (
     finalResult.msg === "existing user" &&
     finalResult.user_id !== user_id

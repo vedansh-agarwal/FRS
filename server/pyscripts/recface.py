@@ -2,6 +2,7 @@ import face_recognition as fr
 import numpy as np
 import json
 import sys
+import cv2
 import os
 
 config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
@@ -20,12 +21,22 @@ output = {'msg': ''}
 given_image = fr.load_image_file(imgloc)
 face_locations = fr.face_locations(given_image, model=training_model)
 
+im = cv2.imread(imgloc)
+
 if len(face_locations) == 0:
     output['msg'] = 'no face found'
     print(output)
     sys.exit()
 elif len(face_locations) > 1:
     output['msg'] = 'multiple faces found'
+    print(output)
+    sys.exit()
+
+t, r, b, l = face_locations[0]
+h, w, c = im.shape
+
+if (r - l) * (b - t) / (h * w) < 0.6:
+    output['msg'] = 'reduce distance between face and camera'
     print(output)
     sys.exit()
 

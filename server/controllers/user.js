@@ -42,7 +42,7 @@ const recognizeUser = async (req, res) => {
     const finalResult = JSON.parse(String(process.stdout).replace(/'/g, '"'));
 
     if(finalResult.msg === "no face found" || finalResult.msg === "multiple faces found") {
-        fs.unlinkSync(imgpath);
+        // fs.unlinkSync(imgpath);
         return res.status(211).json({msg: finalResult.msg});
     }
     else if(finalResult.msg === "existing user") {
