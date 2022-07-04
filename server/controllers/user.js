@@ -19,6 +19,10 @@ const recface = path.join(pyscripts, "recface.py");
 const recognizeUser = async (req, res) => {
     var { base64img, in_out_status } = req.body;
 
+    if(!base64img) {
+        return res.status(206).json({ msg: "no image recieved" });
+    }
+
     if(in_out_status != "IN" && in_out_status != "OUT") {
         return res.status(400).send({msg:"Invalid in_out_status"});
     }
