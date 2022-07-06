@@ -79,8 +79,10 @@ const recognizeFace = async (req, res) => {
     return res.status(415).json({ msg: "unsupported filetype" });
   }
 
+  var update = true;
   if (!user_id) {
     user_id = uuidv4();
+    update = false;
   }
 
   const imgpath = path.join(tempFolder, user_id + extension);
@@ -95,49 +97,29 @@ const recognizeFace = async (req, res) => {
   const process = spawnSync("python3", [recface, imgpath, fe_file, "admin"]);
   const finalResult = JSON.parse(String(process.stdout).replace(/'/g, '"'));
 
-  if (
-    finalResult.msg === "no face found" ||
-    finalResult.msg === "multiple faces found"
-  ) {
-    alog(
-      admin,
-      `Image with ${finalResult.msg.substring(
-        0,
-        finalResult.msg.lastIndexOf(" ")
-      )} input by the admin`
-    );
+  if (finalResult.msg === "no face found" || finalResult.msg === "multiple faces found") {
+    alog(admin,`Image with ${finalResult.msg.substring(0,finalResult.msg.lastIndexOf(" "))} input by the admin`);
     fs.unlinkSync(imgpath);
-    return res
-      .status(216)
-      .json({ msg: finalResult.msg, user_id: "", extension: "" });
-  } else if(finalResult.msg === "reduce distance between face and camera") {
+    return res.status(216).json({ msg: finalResult.msg, user_id: "", extension: "" });
+  } 
+  else if(finalResult.msg === "reduce distance between face and camera") {
     alog(admin, `Image with too little face area input by the admin`);
     fs.unlinkSync(imgpath);
-    return res
-      .status(216)
-      .json({ msg: finalResult.msg, user_id: "", extension: "" });
-  } else if (
-    finalResult.msg === "existing user" &&
-    finalResult.user_id !== user_id
-  ) {
+    return res.status(216).json({ msg: finalResult.msg, user_id: "", extension: "" });
+  } 
+  else if (finalResult.msg === "existing user" && finalResult.user_id !== user_id) {
     fs.unlinkSync(imgpath);
-    alog(
-      admin,
-      `Image with existing user_id: ${finalResult.user_id} input by the admin`
-    );
-    return res.status(200).json({
-      msg: finalResult.msg,
-      user_id: finalResult.user_id,
-      extension: "",
-    });
-  } else {
+    alog(admin,`Image with existing user_id: ${finalResult.user_id} input by the admin`);
+    return res.status(200).json({msg: finalResult.msg, user_id: finalResult.user_id, extension: ""});
+  } 
+  else {
     alog(admin, `Image with new user_id: ${user_id} input by the admin`);
-    return res.status(211).json({
-      msg: finalResult.msg,
-      user_id: user_id,
-      extension: extension,
-      face_encoding: finalResult.face_encoding,
-    });
+    if(update && finalResult.user_id !== user_id) {
+      return res.status(211).json({msg: "Unable to proceed as face in the image is very different from the previous"}); 
+    }
+    else {
+      return res.status(211).json({msg: finalResult.msg, user_id: user_id, extension: extension,face_encoding: finalResult.face_encoding});
+    }
   }
 };
 

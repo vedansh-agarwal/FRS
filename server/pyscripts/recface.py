@@ -37,7 +37,7 @@ elif len(face_locations) > 1:
 t, r, b, l = face_locations[0]
 h, w, c = im.shape
 
-if (use_case != "user") and ((b-t) / h < face_ratio) and ((r-l)/w < face_ratio) and ((r - l) * (b - t) / (h * w) < face_ratio):
+if (use_case != "user") and ((r-l)/w < face_ratio) and ((b-t)/h < face_ratio) and ((r - l) * (b - t) / (h * w) < face_ratio):
     output['msg'] = 'reduce distance between face and camera'
     print(output)
     sys.exit()
