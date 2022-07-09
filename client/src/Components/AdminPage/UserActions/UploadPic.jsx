@@ -95,15 +95,13 @@ const UploadPic = ({ modifyUploadPic, setModifyUploadPic, setModify }) => {
                   style={{ maxWidth: "400px" }}
                 />
               </Box>
-              {error && (
-                <Typography variant='body' align='center'>
-                  {error}
-                </Typography>
-              )}
+              {error && resultCode !== 200 && <h2 align='center'>{error}</h2>}
               <Typography variant='body' align='center'>
-                {user_id !== newId && error && <div>{user_id}</div>}
                 {resultCode === 200 && user_id !== newId && (
-                  <div>You have not been recognized in the image</div>
+                  <div>
+                    Unable to proceed as in the image is very different from the
+                    previous
+                  </div>
                 )}
               </Typography>
               {loading && (

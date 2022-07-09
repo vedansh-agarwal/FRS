@@ -4,8 +4,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const addUser = createAsyncThunk(
   "user/addUserStatus",
   async (user, { getState, rejectWithValue }) => {
-    await axios
-      .post("http://localhost:3007/admin/users/create", {
+    const data = await axios
+      .post(process.env.REACT_APP_SERVER+"/admin/users/create", {
         ...user,
         user_id: getState().image.user_id,
         last_modified_by: getState().admin.username,
@@ -13,13 +13,20 @@ export const addUser = createAsyncThunk(
         face_encoding: getState().image.face_encoding,
       })
       .then((res) => {
+        console.log("inside add user function");
+        console.log(res);
         if (res.status === 200) {
           return res.data;
         } else {
           return rejectWithValue(res.data.msg);
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log("inside console log add users");
+        console.log(err);
+        return rejectWithValue(err.response.data.msg);
+      });
+    return data;
   }
 );
 
@@ -27,7 +34,7 @@ export const getUsers = createAsyncThunk(
   "user/getUsersStatus",
   async (obj, thunkAPI) => {
     const data = await axios
-      .get("http://localhost:3007/admin/dashboard")
+      .get(process.env.REACT_APP_SERVER + "/admin/dashboard")
       .then((res) => {
         console.log(res);
         if (res.status === 200) {
@@ -49,7 +56,7 @@ export const filterUsers = createAsyncThunk(
   async (filter, thunkAPI) => {
     console.log(filter);
     const data = await axios
-      .post("http://localhost:3007/admin/users/search", filter)
+      .post(process.env.REACT_APP_SERVER + "/admin/users/search", filter)
       .then((res) => {
         if (res.status === 200) {
           console.log(res.data);
@@ -68,7 +75,7 @@ export const deleteUser = createAsyncThunk(
   async (user_id, { rejectWithValue, getState }) => {
     console.log(user_id);
     const data = await axios
-      .delete("http://localhost:3007/admin/users", {
+      .delete(process.env.REACT_APP_SERVER + "/admin/users", {
         params: {
           user_id: user_id,
         },
@@ -92,7 +99,7 @@ export const getUser = createAsyncThunk(
   "user/getUserStatus",
   async (user_id, thunkAPI) => {
     const data = await axios
-      .get("http://localhost:3007/admin/users/?user_id=" + user_id)
+      .get(process.env.REACT_APP_SERVER + "/admin/users/?user_id=" + user_id)
       .then((res) => {
         if (res.status === 200) {
           return res.data;
@@ -117,7 +124,10 @@ export const updateUser = createAsyncThunk(
     };
 
     const data = axios
-      .patch("http://localhost:3007/admin/users/?user_id=" + user.user_id, user)
+      .patch(
+        process.env.REACT_APP_SERVER + "/admin/users/?user_id=" + user.user_id,
+        user
+      )
       .then((res) => {
         console.log(res);
         if (res.status === 200) {
@@ -138,7 +148,7 @@ export const getDisplayUser = createAsyncThunk(
   "user/getDisplayUserStatus",
   async (user_id, thunkAPI) => {
     const data = await axios
-      .get("http://localhost:3007/admin/users/?user_id=" + user_id)
+      .get(process.env.REACT_APP_SERVER + "/admin/users/?user_id=" + user_id)
       .then((res) => {
         if (res.status === 200) {
           return res.data;
@@ -158,7 +168,9 @@ export const checkFace = createAsyncThunk(
     const image = getState().user.image;
     console.log(image);
     const data = await axios
-      .post("http://localhost:3007/admin/recognizeFace", { base64img: image })
+      .post(process.env.REACT_APP_SERVER + "/admin/recognizeFace", {
+        base64img: image,
+      })
       .then((res) => {
         if (res.status === 200) {
           return { msg: "Success" };

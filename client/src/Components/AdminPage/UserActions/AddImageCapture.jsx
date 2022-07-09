@@ -23,11 +23,11 @@ const AddImageCapture = ({ takePic, setTakePic, setAddOpenOne }) => {
   const webcamRef = useRef(null);
   const imgSrc = useSelector((state) => state.image.base64img);
   const [ignore, setIgnore] = useState(false);
-  // const [addOpenOne, setAddOpenOne] = useState(false);
   const error = useSelector((state) => state.image.error);
   const resultCode = useSelector((state) => state.image.resultCode);
   const loading = useSelector((state) => state.image.loading);
   const user_id = useSelector((state) => state.image.user_id);
+  const name = useSelector((state) => state.image.name);
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     dispatch(addImageCamera({ image: imageSrc }));
@@ -87,16 +87,10 @@ const AddImageCapture = ({ takePic, setTakePic, setAddOpenOne }) => {
             {imgSrc && (
               <>
                 <img src={imgSrc} />
-                {error && (
-                  <Typography variant='h6' align='center'>
-                    {error}
-                  </Typography>
-                )}
+                {error && resultCode !== 200 && <h2 align='center'>{error}</h2>}
                 <Typography variant='h6' align='center'>
-                  {user_id && error && <div>{user_id}</div>}
-                  {resultCode === 200 && (
-                    <div>Choose another face or the update in the database</div>
-                  )}
+                  {resultCode === 200 &&
+                    `The face in the image is very similar to ${name} having id ${user_id}. Please upload another image to continue.`}
                 </Typography>
                 {loading && (
                   <Box

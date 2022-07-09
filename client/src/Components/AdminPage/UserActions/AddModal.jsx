@@ -11,12 +11,15 @@ import {
   InputLabel,
   FormControl,
   FormHelperText,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import validator from "validator";
 import "../Admin.css";
 import { useSelector, useDispatch } from "react-redux";
 import { addUser } from "../../../Redux/functions/userFunctions";
 import { reset } from "../../../Redux/reducers/image";
+import { resetUser } from "../../../Redux/reducers/userReducer";
 
 const AddModal = ({ addOpen, setAddOpen }) => {
   const dispatch = useDispatch();
@@ -28,7 +31,10 @@ const AddModal = ({ addOpen, setAddOpen }) => {
     mob_no: "",
   });
   const [errors, setErrors] = useState(null);
-
+  const count = useSelector((state) => state.user.count);
+  const error = useSelector((state) => state.user.error.addUser);
+  const loading = useSelector((state) => state.user.loading.addUser);
+  const result = useSelector((state) => state.user.result.addUser);
   useEffect(() => {
     // console.log(image);
     if (
@@ -36,23 +42,36 @@ const AddModal = ({ addOpen, setAddOpen }) => {
       Object.values(errors).filter((errors) => errors.length !== 0).length === 0
     ) {
       dispatch(addUser(values));
-      setAddOpen(false);
-      setValues({
-        name: "",
-        gender: "",
-        city: "",
-        department: "",
-        mob_no: "",
-      });
       return () => {
         dispatch(reset());
+        dispatch(resetUser());
       };
     }
   }, [errors]);
 
+  useEffect(() => {
+    if (error === null && loading === false && result !== null) {
+      console.log("here");
+      console.log(error === null);
+      console.log(loading === false);
+      console.log(result !== null);
+      setAddOpen(false);
+      return () => {
+        setValues({
+          name: "",
+          gender: "",
+          city: "",
+          department: "",
+          mob_no: "",
+        });
+      };
+    }
+  }, [count, error, loading, result]);
+
   const handleClose = () => {
     setAddOpen(false);
     dispatch(reset());
+    dispatch(resetUser());
   };
 
   const handleSubmit = () => {
@@ -107,6 +126,7 @@ const AddModal = ({ addOpen, setAddOpen }) => {
     });
     setAddOpen(false);
     setErrors(null);
+    dispatch(resetUser());
     dispatch(reset());
   };
 
@@ -172,7 +192,10 @@ const AddModal = ({ addOpen, setAddOpen }) => {
             variant='outlined'
             fullWidth
           />
-
+          {loading && <CircularProgress />}
+          {!loading && error && (
+            <Typography variant='body2'>{error}</Typography>
+          )}
           <Box className='addModalBox'>
             <Button
               variant='contained'

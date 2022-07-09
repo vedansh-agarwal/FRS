@@ -29,6 +29,7 @@ const AddUploadPic = ({ uploadPic, setUploadPic, setCount, setAddOpen }) => {
   const user_id = useSelector((state) => state.image.user_id);
   const [selected, setSelected] = useState(false);
   const [files, setFiles] = useState();
+  const name = useSelector((state) => state.image.name);
   const image = useSelector((state) => state.image.base64img);
   useEffect(() => {
     if (resultCode === 211 && uploadPic === true) {
@@ -88,16 +89,10 @@ const AddUploadPic = ({ uploadPic, setUploadPic, setCount, setAddOpen }) => {
                     style={{ maxWidth: "400px" }}
                   />
                 </Box>
-                {error && (
-                  <Typography variant='h6' align='center'>
-                    {error}
-                  </Typography>
-                )}
+                {error && resultCode !== 200 && <h2 align='center'>{error}</h2>}
                 <Typography variant='h6' align='center'>
-                  {user_id && error && <div>{user_id}</div>}
-                  {resultCode === 200 && (
-                    <div>Choose another face or the update in the database</div>
-                  )}
+                  {resultCode === 200 &&
+                    `The face in the image is very similar to ${name} having id ${user_id}. Please upload another image to continue.`}
                 </Typography>
                 {loading && (
                   <Box

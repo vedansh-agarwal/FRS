@@ -40,24 +40,28 @@ const LoginPage = () => {
   useEffect(() => {
     if (errors) {
       if (!errors.username && !errors.password) {
+        console.log(errors);
         console.log("In login useEffect");
         dispatch(adminLogin(values));
       }
     }
-  }, [values, errors]);
+  }, [errors]);
 
   const handlePassword = () => {
     setPassword((prev) => !prev);
   };
 
   const handleSubmit = () => {
-    setErrors({});
+    setErrors(null);
+    const er = {};
     if (validator.isEmpty(values.username)) {
-      setErrors((prev) => ({ ...prev, username: "Invalid email" }));
+      setErrors((prev) => ({ ...prev }));
+      er = { ...er, username: "Invalid email" };
     }
     if (validator.isEmpty(values.password)) {
-      setErrors((prev) => ({ ...prev, password: "Password is required" }));
+      er = { ...er, password: "Invalid password" };
     }
+    setErrors(er);
   };
 
   return (
@@ -67,13 +71,12 @@ const LoginPage = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        spacing: 3,
       }}
     >
       <Typography variant='h3' align='center' component='b' sx={{ mt: 3 }}>
         Login
       </Typography>
-      <Box sx={{ width: "600px", mt: 3 }}>
+      <Box sx={{ width: ["80%", "70%", "600px"], mt: 3 }}>
         <TextField
           value={values.username}
           onChange={(e) =>
@@ -86,7 +89,7 @@ const LoginPage = () => {
           variant='outlined'
         />
       </Box>
-      <Box sx={{ width: "600px", mt: 3 }}>
+      <Box sx={{ width: ["80%", "70%", "600px"], mt: 3 }}>
         <TextField
           value={values.password}
           type={password ? "password" : "text"}
@@ -111,10 +114,15 @@ const LoginPage = () => {
           variant='outlined'
         />
       </Box>
+      {loginError && (
+        <Typography mt={3} variant='h6' align='center'>
+          {loginError}
+        </Typography>
+      )}
       <Button
         variant='contained'
         size='large'
-        sx={{ mt: 3 }}
+        sx={{ mt: 3, width: ["80%", "70%", "600px"] }}
         onClick={handleSubmit}
       >
         Login

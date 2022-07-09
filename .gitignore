@@ -9,7 +9,6 @@ user_images/deletes/*
 !user_images/deletes/.gitkeep
 
 server/node_modules
-
 .DS_Store
 user_images/.DS_Store
 user_images/captures/.DS_Store

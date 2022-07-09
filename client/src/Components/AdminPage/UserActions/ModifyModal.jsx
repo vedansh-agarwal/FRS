@@ -11,7 +11,6 @@ import {
   InputLabel,
   FormControl,
   FormHelperText,
-  InputBase,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import validator from "validator";
@@ -118,13 +117,15 @@ const ModifyModal = ({ setModify, modify, setModifyOptionAdd }) => {
       >
         <Fade in={modify}>
           <Stack spacing={4} sx={{ py: 2, px: 3 }} className='modifyModalStack'>
-            <InputBase
+            <TextField
               className='ModifyInput'
               value={values.name}
               onChange={(e) => handleChange(e)}
               name='name'
-              placeholder={"Name: " + user.name}
+              placeholder={user.name}
               label='Name'
+              defaultChecked={true}
+              InputLabelProps={{ shrink: true }}
               variant='outlined'
               fullWidth
             />
@@ -146,31 +147,34 @@ const ModifyModal = ({ setModify, modify, setModifyOptionAdd }) => {
                 <MenuItem value='O'>Prefer not to say</MenuItem>
               </Select>
             </FormControl>
-            <InputBase
+            <TextField
               className='ModifyInput'
               value={values.city}
-              placeholder={"City: " + user.city}
+              placeholder={user.city}
               onChange={(e) => handleChange(e)}
               name='city'
+              InputLabelProps={{ shrink: true }}
               label='City'
               variant='outlined'
               fullWidth
             />
-            <InputBase
+            <TextField
               className='ModifyInput'
               value={values.department}
               onChange={(e) => handleChange(e)}
-              placeholder={"Department: " + user.department}
+              placeholder={user.department}
+              InputLabelProps={{ shrink: true }}
               label='Department'
               name='department'
               variant='outlined'
               fullWidth
             />
-            <InputBase
+            <TextField
               className='ModifyInput'
               value={values.mob_no}
               onChange={(e) => handleChange(e)}
-              placeholder={"Mobile No: " + user.mob_no}
+              InputLabelProps={{ shrink: true }}
+              placeholder={user.mob_no}
               label='Mobile No'
               name='mob_no'
               variant='outlined'

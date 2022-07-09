@@ -27,7 +27,7 @@ const Search = () => {
   const [department, setDepartment] = useState([]);
   const [gender, setGender] = useState([""]);
   const [date, setDate] = useState([null, "after"]);
-  const [click, setClick] = useState(false);
+  const [click, setClick] = useState(true);
 
   const handleSubmit = () => {
     console.log(city.length);
@@ -163,7 +163,7 @@ const Search = () => {
           className=''
           variant='outlined'
           sx={{
-            display: [click ? "flex" : "none", click ? "flex" : "none", "none"],
+            display: [click ? "none" : "flex", click ? "none" : "flex", "none"],
             justifyContent: "center",
             alignItems: "center",
           }}

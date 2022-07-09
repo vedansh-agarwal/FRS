@@ -26,6 +26,7 @@ export const userSlice = createSlice({
     user_id: "",
     loading: {},
     error: {},
+    result: {},
     image: null,
     count: 0,
     newFace: false,
@@ -47,16 +48,30 @@ export const userSlice = createSlice({
     resetDisplayUser: (state, action) => {
       state.displayUser = null;
     },
+    resetUser: (state, action) => {
+      state.error.addUser = null;
+      state.result.addUser = null;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(addUser.pending, (state) => {
       state.loading.addUser = true;
+      state.error.addUser = null;
+      state.result.addUser = null;
     });
     builder.addCase(addUser.fulfilled, (state, action) => {
+      console.log(action);
       state.count += 1;
       state.error.checkFace = null;
       state.loading.addUser = false;
-      state.newFace = false;
+      state.result.addUser = true;
+    });
+    builder.addCase(addUser.rejected, (state, action) => {
+      console.log(action);
+      state.count += 1;
+      state.error.addUser = action.payload;
+      state.loading.addUser = false;
+      state.result.addUser = false;
     });
     builder.addCase(getUsers.rejected, (state, action) => {
       state.loading.getUsers = false;
@@ -131,5 +146,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const { addImage, resetImage, setUser } = userSlice.actions;
+export const { addImage, resetImage, setUser, resetUser } = userSlice.actions;
 export default userSlice.reducer;

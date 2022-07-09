@@ -11,21 +11,51 @@ const initialState = {
   extension: null,
   user_id: null,
   resultCode: null,
+  name: null,
 };
 
 export const recognizeImage = createAsyncThunk(
   "image/recognizeImage",
   async (obj, { getState, rejectWithValue }) => {
     const data = await axios
-      .post("http://localhost:3007/admin/recognizeface", {
+      .post(process.env.REACT_APP_SERVER + "/admin/recognizeface", {
         base64img: getState().image.base64img,
         user_id: getState().image.user_id,
         admin: getState().admin.username,
       })
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
         if (res.status === 200) {
-          return rejectWithValue({ ...res.data, resultCode: res.status });
+          const user = await axios
+            .get(
+              process.env.REACT_APP_SERVER +
+                "/admin/users/?user_id=" +
+                res.data.user_id
+            )
+            .then((r) => {
+              console.log("inside image getuser");
+              console.log(r);
+              if (r.status === 200) {
+                return rejectWithValue({
+                  ...res.data,
+                  resultCode: res.status,
+                  ...r.data,
+                });
+              } else {
+                return rejectWithValue({
+                  ...res.data,
+                  resultCode: res.status,
+                  error: r.data.msg,
+                });
+              }
+            })
+            .catch((er) => ({
+              ...res.data,
+              resultCode: res.status,
+              error: er.response.data.msg,
+            }));
+
+          return user;
         } else if (res.status === 211) {
           return { ...res.data, resultCode: res.status };
         } else {
@@ -98,8 +128,12 @@ const imageSlice = createSlice({
       state.loading = true;
       state.error = null;
       state.resultCode = null;
+      state.user_id = null;
+      state.face_encoding = null;
+      state.extension = null;
     });
     builder.addCase(recognizeImage.fulfilled, (state, action) => {
+      console.log(action.payload);
       state.loading = false;
       state.result = action.payload.msg;
       state.extension = action.payload.extension;
@@ -110,13 +144,13 @@ const imageSlice = createSlice({
     });
     builder.addCase(recognizeImage.rejected, (state, action) => {
       state.result = false;
-      state.loading = false;
       state.face_encoding = action.payload.face_encoding;
       state.extension = action.payload.extension;
       state.user_id = action.payload.user_id;
-
       state.error = action.payload.msg;
+      state.name = action.payload.name;
       state.resultCode = action.payload.resultCode;
+      state.loading = false;
     });
   },
 });
